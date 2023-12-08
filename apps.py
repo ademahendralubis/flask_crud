@@ -48,11 +48,16 @@ def single_book(id):
     book = None
     if request.method == "GET":
         cursor.execute("SELECT * FROM book WHERE id=?", (id,))
-        rows = cursor.fetchall()
-        for r in rows:
-            book = r
-        if book is not None:
-            return jsonify(book), 200
+        data = cursor.fetchone()
+        
+        if data is not None:
+            response = {
+                "id": data[0],
+                "author": data[1],
+                "language": data[2],
+                "title": data[3],
+            }
+            return jsonify(response), 200
         else:
             return "Something wrong", 404
 
@@ -62,17 +67,17 @@ def single_book(id):
                     author=?,
                     language=?
                 WHERE id=? """
-
-        author = request.form["author"]
-        language = request.form["language"]
-        title = request.form["title"]
+        content = request.get_json()        
+        author = content['author']
+        language = content['language']
+        title = content['title']
         updated_book = {
             "id": id,
             "author": author,
             "language": language,
             "title": title,
         }
-        conn.execute(sql, (author, language, title, id))
+        conn.execute(sql, (title, author, language, id))
         conn.commit()
         return jsonify(updated_book)
 
