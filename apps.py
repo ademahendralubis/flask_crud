@@ -1,9 +1,20 @@
 from flask import Flask, request, jsonify
+from flask_httpauth import HTTPBasicAuth
 import json
 import sqlite3
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
 
+USER_DATA = {
+        "admin" : "123"
+    }
+
+@auth.verify_password
+def verify(username, password):
+    if not (username and password):
+        return False
+    return USER_DATA.get(username) == password
 
 def db_connection():
     conn = None
@@ -15,6 +26,7 @@ def db_connection():
 
 
 @app.route("/books", methods=["GET", "POST"])
+@auth.login_required
 def books():
     conn = db_connection()
     cursor = conn.cursor()
@@ -38,14 +50,14 @@ def books():
                  VALUES (?, ?, ?)"""
         cursor = cursor.execute(sql, (new_author, new_lang, new_title))
         conn.commit()
-        return f"Book with the id: 0 created successfully", 201
+        return f"Book inserted successfully", 201
 
 
 @app.route("/book/<int:id>", methods=["GET", "PUT", "DELETE"])
+@auth.login_required
 def single_book(id):
     conn = db_connection()
     cursor = conn.cursor()
-    book = None
     if request.method == "GET":
         cursor.execute("SELECT * FROM book WHERE id=?", (id,))
         data = cursor.fetchone()
