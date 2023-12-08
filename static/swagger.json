@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: BookStore - OpenAPI 3.0
+servers:
+  - url: http://localhost:5000
+tags:
+  - name: books
+    description: Find all books and insert new book
+  - name: book
+    description: Access to Petstore orders
+paths:
+  /books:
+    get:
+      tags:
+        - books
+      summary: Find all books
+      description: Find all books
+      operationId: getBook
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '405':
+          description: Invalid input
+      security:
+        - basicAuth: ["YWRtaW46MTIz"]
+    post:
+      tags:
+        - books
+      summary: Insert A New Book
+      description: Insert A New Book
+      operationId: addBook
+      requestBody:
+        description: Insert A New Book
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertBook'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/InsertBook'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InsertBook'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsertBookSuccess'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/InsertBookSuccess'
+        '405':
+          description: Invalid input
+      security:
+         - basicAuth: ['YWRtaW46MTIz']
+  /book/{bookId}:
+    get:
+      tags:
+        - book
+      summary: Find book By ID
+      description: Find book By ID
+      operationId: getBookById
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of Book
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book Not Exist
+      security:
+        - basicAuth: ["YWRtaW46MTIz"]
+    put:
+      tags:
+        - book
+      summary: Update a Book By ID
+      description: Update a Book By ID
+      operationId: updateBookById
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of Book
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Update a Book By ID
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertBook'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/InsertBook'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InsertBook'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book Not Exist
+      security:
+         - basicAuth: ['YWRtaW46MTIz']
+    delete:
+      tags:
+        - book
+      summary: Delete Book By ID
+      description: Delete Book By ID
+      operationId: deleteBookByID
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of Book
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteMessageSuccess'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/DeleteMessageSuccess'
+        '404':
+          description: Book Not Exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteMessageFailed'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/DeleteMessageFailed'
+      security:
+         - basicAuth: ['YWRtaW46MTIz']
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        author:
+          type: string
+          example: James Wang
+        language:
+          type: string
+          example: English
+        title:
+          type: string
+          example: Basic English
+      xml:
+        name: user
+    InsertBook:
+      type: object
+      properties:
+        author:
+          type: string
+          example: James Wang
+        language:
+          type: string
+          example: English
+        title:
+          type: string
+          example: Basic English
+      xml:
+        name: user
+    InsertBookSuccess:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Book inserted successfully
+      xml:
+        name: user
+    DeleteMessageSuccess:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The book with ID {bookId} has been deleted
+      xml:
+        name: user
+    DeleteMessageFailed:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Delete Failed, Book not exist
+      xml:
+        name: user
+    
+  requestBodies:
+    Book:
+      description: Pet object that needs to be added to the store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Book'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Book'
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic

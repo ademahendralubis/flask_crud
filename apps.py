@@ -1,9 +1,32 @@
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPBasicAuth
+from flask_swagger_ui import get_swaggerui_blueprint
 import sqlite3
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
+
+SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
+API_URL = '/static/swagger.json'  # Our API url (can of course be a local resource)
+
+# Call factory function to create our blueprint
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    API_URL,
+    config={  # Swagger UI config overrides
+        'app_name': "Test application"
+    },
+    # oauth_config={  # OAuth config. See https://github.com/swagger-api/swagger-ui#oauth2-configuration .
+    #    'clientId': "your-client-id",
+    #    'clientSecret': "your-client-secret-if-required",
+    #    'realm': "your-realms",
+    #    'appName': "your-app-name",
+    #    'scopeSeparator': " ",
+    #    'additionalQueryStringParams': {'test': "hello"}
+    # }
+)
+
+app.register_blueprint(swaggerui_blueprint)
 
 USER_DATA = {
         "admin" : "123"
@@ -49,7 +72,7 @@ def books():
                  VALUES (?, ?, ?)"""
         cursor = cursor.execute(sql, (new_author, new_lang, new_title))
         conn.commit()
-        return "Book inserted successfully", 201
+        return {"message" :"Book inserted successfully"}, 201
 
 
 @app.route("/book/<int:id>", methods=["GET", "PUT", "DELETE"])
