@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_httpauth import HTTPBasicAuth
-import json
 import sqlite3
 
 app = Flask(__name__)
@@ -50,7 +49,7 @@ def books():
                  VALUES (?, ?, ?)"""
         cursor = cursor.execute(sql, (new_author, new_lang, new_title))
         conn.commit()
-        return f"Book inserted successfully", 201
+        return "Book inserted successfully", 201
 
 
 @app.route("/book/<int:id>", methods=["GET", "PUT", "DELETE"])
@@ -60,6 +59,7 @@ def single_book(id):
     cursor = conn.cursor()
     if request.method == "GET":
         cursor.execute("SELECT * FROM book WHERE id=?", (id,))
+        
         data = cursor.fetchone()
         
         if data is not None:
@@ -71,9 +71,12 @@ def single_book(id):
             }
             return jsonify(response), 200
         else:
-            return "Something wrong", 404
+            return {"message": "Book not exist"}, 404
 
     if request.method == "PUT":
+        cursor.execute("SELECT * FROM book WHERE id=?", (id,))
+        data = cursor.fetchone()
+        
         sql = """UPDATE book
                 SET title=?,
                     author=?,
@@ -91,13 +94,24 @@ def single_book(id):
         }
         conn.execute(sql, (title, author, language, id))
         conn.commit()
-        return jsonify(updated_book)
+        if data is not None:
+            return jsonify(updated_book)
+        else:
+            return {"message": "Book not exist"}, 404
 
     if request.method == "DELETE":
+        cursor.execute("SELECT * FROM book WHERE id=?", (id,))
+        
+        data = cursor.fetchone()
+        
         sql = """ DELETE FROM book WHERE id=? """
         conn.execute(sql, (id,))
         conn.commit()
-        return "The book with id: {} has been ddeleted.".format(id), 200
+        if data is not None:
+            message = "The book with id: {} has been deleted.".format(id)
+            return {"message" : message}, 200
+        else:
+            return {"message": "Delete Failed, Book not exist"}, 404
 
 
 if __name__ == "__main__":
