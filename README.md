@@ -9,5 +9,5 @@ python apps.py
 
 link to api docs:
 ```sh
-[python apps.py](http://localhost:5000/api/docs/)http://localhost:5000/api/docs/
+http://localhost:5000/api/docs/
 ```
